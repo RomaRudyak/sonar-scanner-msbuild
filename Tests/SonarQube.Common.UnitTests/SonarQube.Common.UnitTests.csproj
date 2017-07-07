@@ -47,7 +47,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <HintPath>..\..\packages\MicrosoftVisualStudioQualityToolsUnitTestFramework.1.0.0\lib\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>

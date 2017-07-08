@@ -117,7 +117,7 @@ namespace SonarScanner.Shim
         private static string FindScannerExe()
         {
             var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", "sonar-scanner.bat");
+            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", "sonar-scanner");
         }
 
         public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName)

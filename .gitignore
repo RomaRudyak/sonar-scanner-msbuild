@@ -168,3 +168,5 @@ build/
 # IntelliJ
 .idea
 *.iml
+
+*.userprefs

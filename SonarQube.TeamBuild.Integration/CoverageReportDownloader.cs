@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
+
 using Microsoft.TeamFoundation.Client;
 using Microsoft.VisualStudio.Services.Common;
 using SonarQube.Common;
@@ -88,14 +88,16 @@ namespace SonarQube.TeamBuild.Integration
             using (TfsTeamProjectCollection collection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(tfsCollectionUri))
             {
                 // Build agents run non-attended and most often non-interactive so make sure not to create a credential prompt
-                collection.ClientCredentials.AllowInteractive = false;
+                // collection.ClientCredentials.AllowInteractive = false;
+                collection.ClientCredentials.PromptType = CredentialPromptType.DoNotPrompt;
                 collection.EnsureAuthenticated();
 
                 logger.LogInfo(Resources.DOWN_DIAG_ConnectedToTFS, tfsUri);
 
                 // We need VSS credentials that encapsulate all types of credentials (NetworkCredentials for TFS, OAuth for VSO)
-                TfsConnection connection = collection as TfsConnection;
-                vssCreds = connection.ClientCredentials.ConvertToVssCredentials(tfsCollectionUri);
+                // TfsConnection connection = collection as TfsConnection;
+                // vssCreds = connection.ClientCredentials.ConvertToVssCredentials(tfsCollectionUri);
+                vssCreds = collection.ClientCredentials;
             }
 
             Debug.Assert(vssCreds != null, "Not expecting ConvertToVssCredentials ");

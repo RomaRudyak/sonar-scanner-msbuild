@@ -128,10 +128,10 @@
   </Target>
   <Target Name="ZipPayloadFiles">
     <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
-      <ZipCommand>powershell.exe -executionpolicy bypass -command "Add-Type -assembly system.io.compression.filesystem; Add-Type -assembly system.text.encoding; Add-Type -TypeDefinition 'public class MyEncoder : System.Text.UTF8Encoding { public MyEncoder() : base(true) {} public override byte[] GetBytes(string s) { return base.GetBytes(s.Replace((char) 92, (char) 47)); } }'; $enc = New-Object MyEncoder; [io.compression.zipfile]::CreateFromDirectory('$(WorkDestinationDir)', '$(DestinationDir)SonarQube.Scanner.MSBuild.zip', [io.compression.compressionlevel]::fastest, $false, $enc)"</UnzipCommand>
+      <ZipCommand>powershell.exe -executionpolicy bypass -command "Add-Type -assembly system.io.compression.filesystem; Add-Type -assembly system.text.encoding; Add-Type -TypeDefinition 'public class MyEncoder : System.Text.UTF8Encoding { public MyEncoder() : base(true) {} public override byte[] GetBytes(string s) { return base.GetBytes(s.Replace((char) 92, (char) 47)); } }'; $enc = New-Object MyEncoder; [io.compression.zipfile]::CreateFromDirectory('$(WorkDestinationDir)', '$(DestinationDir)SonarQube.Scanner.MSBuild.zip', [io.compression.compressionlevel]::fastest, $false, $enc)"</ZipCommand>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
-      <ZipCommand>zip -r $(DestinationDir)SonarQube.Scanner.MSBuild.zip $(WorkDestinationDir)</UnzipCommand>
+      <ZipCommand>zip -r $(DestinationDir)SonarQube.Scanner.MSBuild.zip $(WorkDestinationDir)</ZipCommand>
     </PropertyGroup>
     <Exec Command="$(ZipCommand)" />
   </Target>

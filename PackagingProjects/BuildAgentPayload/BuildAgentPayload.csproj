@@ -91,7 +91,7 @@
       <Name>SonarScanner.Shim</Name>
     </ProjectReference>
   </ItemGroup>
-  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
+  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <Url ParameterType="System.String" Required="true" />
       <File ParameterType="System.String" Required="false" />

@@ -124,7 +124,14 @@
   </Target>
   <Target Name="UnzipScannerCli">
     <RemoveDir Directories="$(OutputPath)$(ScannerCliDirectory)" />
-    <Exec Command="powershell.exe -executionpolicy bypass -command &quot;Add-Type -assembly system.io.compression.filesystem; [io.compression.zipfile]::ExtractToDirectory('$(OutputPath)$(ScannerCliArtifact)', '$(WorkDestinationDir)')&quot;" />
+    <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
+      <UnzipCommand>powershell.exe -executionpolicy bypass -command "Add-Type -assembly system.io.compression.filesystem; [io.compression.zipfile]::ExtractToDirectory('$(OutputPath)$(ScannerCliArtifact)', '$(WorkDestinationDir)')"</UnzipCommand>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
+      <UnzipCommand>unzip $(OutputPath)$(ScannerCliArtifact) -d $(WorkDestinationDir)</UnzipCommand>
+    </PropertyGroup>
+    <MakeDir Directories="$(WorkDestinationDir)" Condition=" '$(OS)' == 'Unix' " />
+    <Exec Command="$(UnzipCommand)" />
   </Target>
   <Target Name="ZipPayloadFiles">
     <PropertyGroup Condition=" '$(OS)' != 'Unix' ">

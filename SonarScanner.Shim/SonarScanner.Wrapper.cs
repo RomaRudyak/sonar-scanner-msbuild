@@ -137,7 +137,7 @@ namespace SonarScanner.Shim
             Debug.Assert(!String.IsNullOrWhiteSpace(config.SonarScannerWorkingDirectory), "The working dir should have been set in the analysis config");
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
-            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, true, logger)
+            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, false, logger)
             {
                 CmdLineArgs = allCmdLineArgs,
                 WorkingDirectory = config.SonarScannerWorkingDirectory,

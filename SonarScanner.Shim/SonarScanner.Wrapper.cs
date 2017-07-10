@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace SonarScanner.Shim
 {
-    public class SonarScannerWrapper : ISonarScanner
+    public abstract class SonarScannerWrapper : ISonarScanner
     {
         /// <summary>
         /// Env variable that controls the amount of memory the JVM can use for the sonar-scanner.
@@ -57,6 +57,8 @@ namespace SonarScanner.Shim
         private const string SonarScannerVersion = "3.0.3.778";
 
         #region ISonarScanner interface
+
+        public abstract Boolean IsBatchScript { get; }
 
         public ProjectInfoAnalysisResult Execute(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger)
         {
@@ -97,7 +99,7 @@ namespace SonarScanner.Shim
 
         #region Private methods
 
-        private static void InternalExecute(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, ProjectInfoAnalysisResult result)
+        private void InternalExecute(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, ProjectInfoAnalysisResult result)
         {
             ProjectInfoReportBuilder.WriteSummaryReport(config, result, logger);
 
@@ -110,17 +112,20 @@ namespace SonarScanner.Shim
             else
             {
                 string exeFileName = FindScannerExe();
-                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath);
+                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath, IsBatchScript);
             }
         }
 
-        private static string FindScannerExe()
+        private string FindScannerExe()
         {
             var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", "sonar-scanner.bat");
+            var scriptName = GetScannerFileName();
+            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", scriptName);
         }
 
-        public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName)
+        protected abstract String GetScannerFileName();
+
+        public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName, Boolean isBatchScript)
         {
             Debug.Assert(File.Exists(exeFileName), "The specified exe file does not exist: " + exeFileName);
             Debug.Assert(File.Exists(propertiesFileName), "The specified properties file does not exist: " + propertiesFileName);
@@ -137,7 +142,7 @@ namespace SonarScanner.Shim
             Debug.Assert(!String.IsNullOrWhiteSpace(config.SonarScannerWorkingDirectory), "The working dir should have been set in the analysis config");
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
-            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, true, logger)
+            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, isBatchScript, logger)
             {
                 CmdLineArgs = allCmdLineArgs,
                 WorkingDirectory = config.SonarScannerWorkingDirectory,

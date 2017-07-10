@@ -117,7 +117,7 @@ namespace SonarScanner.Shim
         private static string FindScannerExe()
         {
             var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", "sonar-scanner");
+            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", "sonar-scanner.bat");
         }
 
         public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName)
@@ -137,7 +137,7 @@ namespace SonarScanner.Shim
             Debug.Assert(!String.IsNullOrWhiteSpace(config.SonarScannerWorkingDirectory), "The working dir should have been set in the analysis config");
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
-            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, false, logger)
+            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, true, logger)
             {
                 CmdLineArgs = allCmdLineArgs,
                 WorkingDirectory = config.SonarScannerWorkingDirectory,

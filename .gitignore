@@ -170,3 +170,5 @@ build/
 *.iml
 
 *.userprefs
+
+sonar-scanner-msbuild\.zip

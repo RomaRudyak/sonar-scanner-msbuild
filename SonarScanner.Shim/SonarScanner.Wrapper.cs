@@ -111,16 +111,17 @@ namespace SonarScanner.Shim
             }
             else
             {
-                string exeFileName = FindScannerExe();
+                var scriptName = GetScannerScripFileName();
+                var scriptDirPath = GetScannerScriptDirPath();
+                string exeFileName = Path.Combine(scriptDirPath, scriptName);
                 result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath, IsBatchScript);
             }
         }
 
-        private string FindScannerExe()
+        private static string GetScannerScriptDirPath()
         {
             var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            var scriptName = GetScannerScripFileName();
-            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", scriptName);
+            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin");
         }
 
         protected abstract String GetScannerScripFileName();

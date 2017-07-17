@@ -38,7 +38,7 @@ namespace SonarQube.Bootstrapper
         {
             return new MSBuildPostProcessor(
                 new CoverageReportProcessor(),
-                new SonarScannerWrapper(),
+                new SonarScannerWrapperWin(),
                 new SummaryReportBuilder(),
                 logger,
                 new TargetsUninstaller());

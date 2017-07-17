@@ -63,6 +63,8 @@
     <Compile Include="ProjectLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProjectInfoReportBuilder.cs" />
+    <Compile Include="SonarScanner.Wrapper.Unix.cs" />
+    <Compile Include="SonnarScanner.Wrapper.Win.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -119,13 +119,19 @@ namespace SonarScanner.Shim
         private string FindScannerExe()
         {
             var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            var scriptName = GetScannerFileName();
+            var scriptName = GetScannerScripFileName();
             return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", scriptName);
         }
 
-        protected abstract String GetScannerFileName();
+        protected abstract String GetScannerScripFileName();
 
-        public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName, Boolean isBatchScript)
+        public /* for test purposes */ static bool ExecuteJavaRunner(
+            AnalysisConfig config
+            , IEnumerable<string> userCmdLineArguments
+            , ILogger logger
+            , string exeFileName
+            , string propertiesFileName
+            , Boolean isBatchScript)
         {
             Debug.Assert(File.Exists(exeFileName), "The specified exe file does not exist: " + exeFileName);
             Debug.Assert(File.Exists(propertiesFileName), "The specified properties file does not exist: " + propertiesFileName);
@@ -142,6 +148,7 @@ namespace SonarScanner.Shim
             Debug.Assert(!String.IsNullOrWhiteSpace(config.SonarScannerWorkingDirectory), "The working dir should have been set in the analysis config");
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
+            // NOTE: roru this part must be extended
             ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, isBatchScript, logger)
             {
                 CmdLineArgs = allCmdLineArgs,

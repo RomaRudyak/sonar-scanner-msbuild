@@ -39,7 +39,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
       <Private Condition=" '$(OS)' == 'Unix' ">True</Private>
       <HintPath Condition=" '$(OS)' == 'Unix' ">..\..\packages\MicrosoftVisualStudioQualityToolsUnitTestFramework.1.0.0\lib\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath> 
     </Reference>

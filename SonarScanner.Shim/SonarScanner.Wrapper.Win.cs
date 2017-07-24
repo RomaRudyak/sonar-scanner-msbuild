@@ -29,8 +29,6 @@ namespace SonarScanner.Shim
 {
     public class SonarScannerWrapperWin : SonarScannerWrapper
     {
-        public override bool IsBatchScript => true;
-
         protected override string GetScannerScripFileName() => "sonar-scanner.bat";
     }
 }

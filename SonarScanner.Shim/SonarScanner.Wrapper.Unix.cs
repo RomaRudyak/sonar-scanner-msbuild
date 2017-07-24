@@ -29,8 +29,20 @@ namespace SonarScanner.Shim
 {
     public class SonarScannerWrapperUnix : SonarScannerWrapper
     {
-        public override bool IsBatchScript => false;
-
         protected override string GetScannerScripFileName() => "sonar-scanner";
+
+        protected override void OnPreExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string fullPropertiesFilePath)
+        {
+            base.OnPreExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, fullPropertiesFilePath);
+
+
+            var psi = new ProcessStartInfo("chmod", $"+x {exeFileName}")
+            {
+                WorkingDirectory = config.SonarScannerWorkingDirectory,
+                UseShellExecute = false
+            };
+
+            Process.Start(psi);
+        }
     }
 }

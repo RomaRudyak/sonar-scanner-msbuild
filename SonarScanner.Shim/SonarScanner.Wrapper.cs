@@ -58,8 +58,6 @@ namespace SonarScanner.Shim
 
         #region ISonarScanner interface
 
-        public abstract Boolean IsBatchScript { get; }
-
         public ProjectInfoAnalysisResult Execute(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger)
         {
             if (config == null)
@@ -114,8 +112,14 @@ namespace SonarScanner.Shim
                 var scriptName = GetScannerScripFileName();
                 var scriptDirPath = GetScannerScriptDirPath();
                 string exeFileName = Path.Combine(scriptDirPath, scriptName);
-                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath, IsBatchScript);
+                OnPreExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath);
+                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath);
             }
+        }
+
+        protected virtual void OnPreExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string fullPropertiesFilePath)
+        {
+            
         }
 
         private static string GetScannerScriptDirPath()
@@ -131,8 +135,7 @@ namespace SonarScanner.Shim
             , IEnumerable<string> userCmdLineArguments
             , ILogger logger
             , string exeFileName
-            , string propertiesFileName
-            , Boolean isBatchScript)
+            , string propertiesFileName)
         {
             Debug.Assert(File.Exists(exeFileName), "The specified exe file does not exist: " + exeFileName);
             Debug.Assert(File.Exists(propertiesFileName), "The specified properties file does not exist: " + propertiesFileName);
@@ -150,7 +153,7 @@ namespace SonarScanner.Shim
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
             // NOTE: roru this part must be extended
-            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, isBatchScript, logger)
+            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, true, logger)
             {
                 CmdLineArgs = allCmdLineArgs,
                 WorkingDirectory = config.SonarScannerWorkingDirectory,

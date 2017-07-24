@@ -46,7 +46,6 @@ namespace SonarScanner.Shim.Tests
             TestLogger testLogger = new TestLogger();
             string exePath = CreateDummarySonarScannerBatchFile();
             string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
-            bool isBatchScript = true;
 
             using (EnvironmentVariableScope scope = new EnvironmentVariableScope())
             {
@@ -54,7 +53,7 @@ namespace SonarScanner.Shim.Tests
                 AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
                 // Act
-                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath, isBatchScript);
+                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
 
                 // Assert
                 VerifyProcessRunOutcome(testLogger, this.TestContext.DeploymentDirectory, success, true);
@@ -74,10 +73,9 @@ namespace SonarScanner.Shim.Tests
                 string exePath = CreateDummarySonarScannerBatchFile();
                 string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
                 AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
-                bool isBatchScript = true;
 
                 // Act
-                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath, isBatchScript);
+                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
 
                 // Assert
                 VerifyProcessRunOutcome(testLogger, this.TestContext.DeploymentDirectory, success, true);
@@ -92,10 +90,9 @@ namespace SonarScanner.Shim.Tests
             string exePath = CreateDummarySonarScannerBatchFile();
             string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
             AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
-            bool isBatchScript = true;
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath, isBatchScript);
+            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, true);
@@ -111,7 +108,6 @@ namespace SonarScanner.Shim.Tests
 
             string exePath = CreateDummarySonarScannerBatchFile();
             string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
-            bool isBatchScript = true;
 
             string[] userArgs = new string[] { "-Dsonar.login=me", "-Dsonar.password=my.pwd" };
 
@@ -121,8 +117,7 @@ namespace SonarScanner.Shim.Tests
                 userArgs,
                 logger,
                 exePath,
-                propertiesFilePath,
-                isBatchScript);
+                propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, true);
@@ -150,7 +145,6 @@ namespace SonarScanner.Shim.Tests
 
             string exePath = CreateDummarySonarScannerBatchFile();
             string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
-            bool isBatchScript = true;
 
             string[] userArgs = new string[] { "-Dxxx=yyy", "-Dsonar.password=cmdline.password" };
 
@@ -166,7 +160,7 @@ namespace SonarScanner.Shim.Tests
             config.SetSettingsFilePath(settingsFilePath);
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, userArgs, logger, exePath, propertiesFilePath, isBatchScript);
+            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, userArgs, logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, true);
@@ -227,11 +221,10 @@ namespace SonarScanner.Shim.Tests
             TestLogger logger = new TestLogger();
             string exePath = CreateDummarySonarScannerBatchFile(addMessageToStdErr, exitCode);
             string propertiesFilePath = CreateDummySonarScannerPropertiesFile();
-            bool isBatchScript = true;
             AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath, isBatchScript);
+            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, expectedOutcome);

@@ -75,6 +75,8 @@
     <Compile Include="RoslynV1SarifFixer.cs" />
     <Compile Include="SonarProjectPropertiesValidator.cs" />
     <Compile Include="SonarScanner.Wrapper.cs" />
+    <Compile Include="SonarScanner.Wrapper.Unix.cs" />
+    <Compile Include="SonarScanner.Wrapper.Win.cs" />
     <None Include="packages.config" />
     <None Include="SonarScanner.Shim.ruleset" />
   </ItemGroup>

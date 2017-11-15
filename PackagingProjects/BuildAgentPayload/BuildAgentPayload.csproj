@@ -129,7 +129,7 @@
       <UnzipCommand>powershell.exe -executionpolicy bypass -command "Add-Type -assembly system.io.compression.filesystem; [io.compression.zipfile]::ExtractToDirectory('$(OutputPath)$(ScannerCliArtifact)', '$(WorkDestinationDir)')"</UnzipCommand>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
-      <UnzipCommand>unzip $(OutputPath)$(ScannerCliArtifact) -d $(WorkDestinationDir)</UnzipCommand>
+      <UnzipCommand>unzip -o $(OutputPath)$(ScannerCliArtifact) -d $(WorkDestinationDir)</UnzipCommand>
     </PropertyGroup>
     <MakeDir Directories="$(WorkDestinationDir)" Condition=" '$(OS)' == 'Unix' " />
     <Exec Command="$(UnzipCommand)" />

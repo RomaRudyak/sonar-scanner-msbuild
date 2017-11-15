@@ -112,7 +112,7 @@ namespace SonarScanner.Shim
             else
             {
                 string exeFileName = FindScannerExe();
-                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath, IsBatchScript);
+                result.RanToCompletion = ExecuteJavaRunner(config, userCmdLineArguments, logger, exeFileName, result.FullPropertiesFilePath);
             }
         }
 
@@ -125,7 +125,7 @@ namespace SonarScanner.Shim
 
         protected abstract String GetScannerFileName();
 
-        public /* for test purposes */ static bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName, Boolean isBatchScript)
+        public /* for test purposes */ bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName)
         {
             Debug.Assert(File.Exists(exeFileName), "The specified exe file does not exist: " + exeFileName);
             Debug.Assert(File.Exists(propertiesFileName), "The specified properties file does not exist: " + propertiesFileName);
@@ -142,7 +142,7 @@ namespace SonarScanner.Shim
             Debug.Assert(!String.IsNullOrWhiteSpace(config.SonarScannerWorkingDirectory), "The working dir should have been set in the analysis config");
             Debug.Assert(Directory.Exists(config.SonarScannerWorkingDirectory), "The working dir should exist");
 
-            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, isBatchScript, logger)
+            ProcessRunnerArguments scannerArgs = new ProcessRunnerArguments(exeFileName, IsBatchScript, logger)
             {
                 CmdLineArgs = allCmdLineArgs,
                 WorkingDirectory = config.SonarScannerWorkingDirectory,

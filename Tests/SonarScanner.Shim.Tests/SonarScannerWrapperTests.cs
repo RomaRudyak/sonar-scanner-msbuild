@@ -53,7 +53,7 @@ namespace SonarScanner.Shim.Tests
                 AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
                 // Act
-                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
+                bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
 
                 // Assert
                 VerifyProcessRunOutcome(testLogger, this.TestContext.DeploymentDirectory, success, true);
@@ -75,7 +75,7 @@ namespace SonarScanner.Shim.Tests
                 AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
                 // Act
-                bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
+                bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(config, Enumerable.Empty<string>(), testLogger, exePath, propertiesFilePath);
 
                 // Assert
                 VerifyProcessRunOutcome(testLogger, this.TestContext.DeploymentDirectory, success, true);
@@ -92,7 +92,7 @@ namespace SonarScanner.Shim.Tests
             AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
+            bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, true);
@@ -112,7 +112,7 @@ namespace SonarScanner.Shim.Tests
             string[] userArgs = new string[] { "-Dsonar.login=me", "-Dsonar.password=my.pwd" };
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(
+            bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(
                 new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory },
                 userArgs,
                 logger,
@@ -162,7 +162,7 @@ namespace SonarScanner.Shim.Tests
             config.SetSettingsFilePath(settingsFilePath);
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, userArgs, logger, exePath, propertiesFilePath);
+            bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(config, userArgs, logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, true);
@@ -226,7 +226,7 @@ namespace SonarScanner.Shim.Tests
             AnalysisConfig config = new AnalysisConfig() { SonarScannerWorkingDirectory = this.TestContext.DeploymentDirectory };
 
             // Act
-            bool success = SonarScannerWrapper.ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
+            bool success = new SonarScannerWrapperWin().ExecuteJavaRunner(config, Enumerable.Empty<string>(), logger, exePath, propertiesFilePath);
 
             // Assert
             VerifyProcessRunOutcome(logger, this.TestContext.DeploymentDirectory, success, expectedOutcome);

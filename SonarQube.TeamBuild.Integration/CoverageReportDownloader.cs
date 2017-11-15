@@ -89,7 +89,7 @@ namespace SonarQube.TeamBuild.Integration
             {
                 // Build agents run non-attended and most often non-interactive so make sure not to create a credential prompt
                 // collection.ClientCredentials.AllowInteractive = false;
-                collection.ClientCredentials.PromptType = CredentialPromptType.DoNotPrompt;
+                collection.ClientCredentials.AllowInteractive = false;
                 collection.EnsureAuthenticated();
 
                 logger.LogInfo(Resources.DOWN_DIAG_ConnectedToTFS, tfsUri);

@@ -17,15 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
-using SonarQube.Common;
-using SonarQube.Common.Interfaces;
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SonarQube.Common;
+using SonarQube.Common.Interfaces;
 
 namespace SonarScanner.Shim
 {
@@ -75,20 +74,20 @@ namespace SonarScanner.Shim
 
             TryFixSarifReports(logger, projects, fixer);
 
-            string projectBaseDir = ComputeProjectBaseDir(config, projects);
+            string rootProjectBaseDir = ComputeRootProjectBaseDir(config, projects);
 
             PropertiesWriter writer = new PropertiesWriter(config);
             AnalysisProperties properties = GetAnalysisProperties(config);
             var globalSourceEncoding = GetSourceEncoding(properties, new EncodingProvider());
 
-            ProjectInfoAnalysisResult result = ProcessProjectInfoFiles(projects, writer, logger, projectBaseDir, globalSourceEncoding);
-            writer.WriteSonarProjectInfo(projectBaseDir, result.SharedFiles);
+            ProjectInfoAnalysisResult result = ProcessProjectInfoFiles(projects, writer, logger, rootProjectBaseDir, globalSourceEncoding);
+            writer.WriteSonarProjectInfo(rootProjectBaseDir, result.SharedFiles);
 
             IEnumerable<ProjectInfo> validProjects = result.GetProjectsByStatus(ProjectInfoValidity.Valid);
 
             if (validProjects.Any() || result.SharedFiles.Any())
             {
-                
+
                 // Handle global settings
                 properties = GetAnalysisPropertiesToWrite(properties, logger);
                 writer.WriteGlobalSettings(properties);
@@ -120,7 +119,7 @@ namespace SonarScanner.Shim
         /// 3. the common root path of projects, or if there isn't any
         /// 4. the .sonarqube/out directory
         /// </summary>
-        public static string ComputeProjectBaseDir(AnalysisConfig config, IEnumerable<ProjectInfo> projects)
+        public static string ComputeRootProjectBaseDir(AnalysisConfig config, IEnumerable<ProjectInfo> projects)
         {
             string projectBaseDir = config.GetConfigValue(SonarProperties.ProjectBaseDir, null);
             if (!string.IsNullOrWhiteSpace(projectBaseDir))
@@ -184,8 +183,7 @@ namespace SonarScanner.Shim
 
         private static void TryFixSarifReport(ILogger logger, ProjectInfo project, IRoslynV1SarifFixer fixer, string language, string reportFilePropertyKey)
         {
-            Property reportPathProperty;
-            bool tryResult = project.TryGetAnalysisSetting(reportFilePropertyKey, out reportPathProperty);
+            bool tryResult = project.TryGetAnalysisSetting(reportFilePropertyKey, out Property reportPathProperty);
             if (tryResult)
             {
                 string reportPath = reportPathProperty.Value;
@@ -200,21 +198,22 @@ namespace SonarScanner.Shim
                     if (fixedPath != null)
                     {
                         // otherwise, set the property value (results in no change if the file was already valid)
-                        Property newReportPathProperty = new Property();
-                        newReportPathProperty.Id = reportFilePropertyKey;
-                        newReportPathProperty.Value = fixedPath;
+                        Property newReportPathProperty = new Property
+                        {
+                            Id = reportFilePropertyKey,
+                            Value = fixedPath
+                        };
                         project.AnalysisSettings.Add(newReportPathProperty);
                     }
                 }
             }
         }
-       
+
         private static string GetSourceEncoding(AnalysisProperties properties, IEncodingProvider encodingProvider)
         {
             try
             {
-                Property encodingProperty;
-                if (Property.TryGetProperty(SonarProperties.SourceEncoding, properties, out encodingProperty))
+                if (Property.TryGetProperty(SonarProperties.SourceEncoding, properties, out Property encodingProperty))
                 {
                     return encodingProvider.GetEncoding(encodingProperty.Value).WebName;
                 }
@@ -231,7 +230,7 @@ namespace SonarScanner.Shim
 
         #region Private methods
 
-        private static ProjectInfoAnalysisResult ProcessProjectInfoFiles(IEnumerable<ProjectInfo> projects, PropertiesWriter writer, ILogger logger, string projectBaseDir, string globalSourceEncoding)
+        private static ProjectInfoAnalysisResult ProcessProjectInfoFiles(IEnumerable<ProjectInfo> projects, PropertiesWriter writer, ILogger logger, string rootProjectBaseDir, string globalSourceEncoding)
         {
             ProjectInfoAnalysisResult result = new ProjectInfoAnalysisResult();
 
@@ -241,23 +240,29 @@ namespace SonarScanner.Shim
 
                 if (status == ProjectInfoValidity.Valid)
                 {
-                    IEnumerable<string> files = GetFilesToAnalyze(projectInfo, logger, projectBaseDir, result);
+                    IEnumerable<string> files = GetFilesToAnalyze(projectInfo, logger, rootProjectBaseDir, result);
                     if (files == null || !files.Any())
                     {
                         status = ProjectInfoValidity.NoFilesToAnalyze;
                     }
                     else
                     {
-                        string fxCopReport = TryGetFxCopReport(projectInfo, logger);
                         string vsCoverageReport = TryGetCodeCoverageReport(projectInfo, logger);
                         FixEncoding(logger, globalSourceEncoding, projectInfo);
-                        writer.WriteSettingsForProject(projectInfo, files, fxCopReport, vsCoverageReport);
+                        writer.WriteSettingsForProject(projectInfo, files, vsCoverageReport);
                     }
                 }
 
                 result.Projects.Add(projectInfo, status);
             }
+            result.SharedFiles.RemoveWhere(s => IsPartOfAProject(projects, s));
+
             return result;
+        }
+
+        private static bool IsPartOfAProject(IEnumerable<ProjectInfo> projects, string file)
+        {
+            return projects.Any(projectInfo => IsInFolder(file, projectInfo.GetProjectDirectory()));
         }
 
         private static void FixEncoding(ILogger logger, string globalSourceEncoding, ProjectInfo projectInfo)
@@ -322,7 +327,7 @@ namespace SonarScanner.Shim
         /// Returns all of the valid files that can be analyzed. Logs warnings/info about
         /// files that cannot be analyzed.
         /// </summary>
-        private static IEnumerable<string> GetFilesToAnalyze(ProjectInfo projectInfo, ILogger logger, string projectBaseDir, ProjectInfoAnalysisResult projectResult)
+        private static IEnumerable<string> GetFilesToAnalyze(ProjectInfo projectInfo, ILogger logger, string rootProjectBaseDir, ProjectInfoAnalysisResult projectResult)
         {
             // We're only interested in files that exist and that are under the project root
             var result = new List<string>();
@@ -335,7 +340,7 @@ namespace SonarScanner.Shim
                     {
                         result.Add(file);
                     }
-                    else if (IsInFolder(file, projectBaseDir))
+                    else if (IsInFolder(file, rootProjectBaseDir))
                     {
                         projectResult.SharedFiles.Add(file);
                     }
@@ -357,18 +362,6 @@ namespace SonarScanner.Shim
         {
             string normalizedPath = Path.GetDirectoryName(Path.GetFullPath(filePath));
             return normalizedPath.StartsWith(folder, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string TryGetFxCopReport(ProjectInfo project, ILogger logger)
-        {
-            string fxCopReport = project.TryGetAnalysisFileLocation(AnalysisType.FxCop);
-            if (fxCopReport != null && !File.Exists(fxCopReport))
-            {
-                logger.LogWarning(Resources.WARN_FxCopReportNotFound, fxCopReport);
-                fxCopReport = null;
-            }
-
-            return fxCopReport;
         }
 
         private static string TryGetCodeCoverageReport(ProjectInfo project, ILogger logger)
@@ -409,8 +402,7 @@ namespace SonarScanner.Shim
 
         private static void AddOrSetProperty(string key, string value, AnalysisProperties properties, ILogger logger)
         {
-            Property property;
-            Property.TryGetProperty(key, properties, out property);
+            Property.TryGetProperty(key, properties, out Property property);
             if (property == null)
             {
                 logger.LogDebug(Resources.MSG_SettingAnalysisProperty, key, value);

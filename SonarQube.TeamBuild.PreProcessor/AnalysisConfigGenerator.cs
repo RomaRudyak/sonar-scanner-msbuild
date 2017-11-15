@@ -17,11 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
-using SonarQube.Common;
-using SonarQube.TeamBuild.Integration;
+
 using System;
 using System.Collections.Generic;
+using SonarQube.Common;
+using SonarQube.TeamBuild.Integration;
 
 namespace SonarQube.TeamBuild.PreProcessor
 {
@@ -53,20 +53,19 @@ namespace SonarQube.TeamBuild.PreProcessor
             {
                 throw new ArgumentNullException(nameof(serverProperties));
             }
-            if (analyzersSettings == null)
-            {
-                throw new ArgumentNullException(nameof(analyzersSettings));
-            }
+
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            AnalysisConfig config = new AnalysisConfig();
-            config.SonarProjectKey = localSettings.ProjectKey;
-            config.SonarProjectName = localSettings.ProjectName;
-            config.SonarProjectVersion = localSettings.ProjectVersion;
-            config.SonarQubeHostUrl = localSettings.SonarQubeUrl;
+            AnalysisConfig config = new AnalysisConfig
+            {
+                SonarProjectKey = localSettings.ProjectKey,
+                SonarProjectName = localSettings.ProjectName,
+                SonarProjectVersion = localSettings.ProjectVersion,
+                SonarQubeHostUrl = localSettings.SonarQubeUrl
+            };
 
             config.SetBuildUri(buildSettings.BuildUri);
             config.SetTfsUri(buildSettings.TfsUri);
@@ -106,7 +105,7 @@ namespace SonarQube.TeamBuild.PreProcessor
                 config.SetSettingsFilePath(localSettings.PropertiesFileName);
             }
 
-            config.AnalyzersSettings = analyzersSettings;
+            config.AnalyzersSettings = analyzersSettings ?? throw new ArgumentNullException(nameof(analyzersSettings));
             config.Save(buildSettings.AnalysisConfigFilePath);
 
             return config;

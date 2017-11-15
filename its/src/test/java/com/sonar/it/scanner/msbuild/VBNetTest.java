@@ -21,6 +21,7 @@ package com.sonar.it.scanner.msbuild;
 
 import com.sonar.orchestrator.Orchestrator;
 import com.sonar.orchestrator.locator.FileLocation;
+import com.sonar.orchestrator.locator.MavenLocation;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -61,9 +62,9 @@ public class VBNetTest {
   public static Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
     .setOrchestratorProperty("vbnetVersion", "LATEST_RELEASE")
     .addPlugin("vbnet")
-    .activateLicense("vbnet")
-    .setOrchestratorProperty("fxcopVersion", "LATEST_RELEASE")
-    .addPlugin("fxcop")
+    // Should be the same version than in pom.xml
+    .addPlugin(MavenLocation.of("com.sonarsource.license", "sonar-dev-license-plugin", ScannerMSBuildTest.LICENSE_PLUGIN_VERSION))
+    .activateLicense()
     .build();
 
   @ClassRule
@@ -97,9 +98,7 @@ public class VBNetTest {
 
     List<String> keys = issues.stream().map(i -> i.ruleKey()).collect(Collectors.toList());
     assertThat(keys).containsAll(Arrays.asList("vbnet:S3385",
-      "vbnet:S2358",
-      "fxcop-vbnet:AvoidUnusedPrivateFields",
-      "fxcop-vbnet:AvoidUncalledPrivateCode"));
+      "vbnet:S2358"));
 
     assertThat(getMeasureAsInteger(PROJECT_KEY, "ncloc")).isEqualTo(23);
     assertThat(getMeasureAsInteger(FILE_KEY, "ncloc")).isEqualTo(10);

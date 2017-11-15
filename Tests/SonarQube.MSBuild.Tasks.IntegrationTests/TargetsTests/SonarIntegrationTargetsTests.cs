@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,6 +31,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
     {
         public TestContext TestContext { get; set; }
 
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            HackForVs2017Update3.Enable();
+        }
+
         #region Tests
 
         [TestMethod]
@@ -43,7 +49,7 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
 
             // Act
             ProjectInstance projectInstance = new ProjectInstance(projectRoot.FullPath);
-            
+
             // Assert
             BuildAssertions.AssertPropertyDoesNotExist(projectInstance, TargetProperties.SonarQubeOutputPath);
             BuildAssertions.AssertPropertyDoesNotExist(projectInstance, TargetProperties.SonarQubeConfigPath);
@@ -56,9 +62,11 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string rootInputFolder = TestUtils.CreateTestSpecificFolder(this.TestContext, "Inputs");
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.TeamBuildLegacyBuildDirectory = "";
-            preImportProperties.TeamBuild2105BuildDirectory = "";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                TeamBuildLegacyBuildDirectory = "",
+                TeamBuild2105BuildDirectory = ""
+            };
             ProjectRootElement projectRoot = BuildUtilities.CreateValidProjectRoot(this.TestContext, rootInputFolder, preImportProperties);
 
             // Act
@@ -66,7 +74,7 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
 
             // Assert
             BuildAssertions.AssertPropertyDoesNotExist(projectInstance, TargetProperties.SonarQubeOutputPath);
-            BuildAssertions.AssertPropertyDoesNotExist(projectInstance, TargetProperties.SonarQubeConfigPath);            
+            BuildAssertions.AssertPropertyDoesNotExist(projectInstance, TargetProperties.SonarQubeConfigPath);
         }
 
         [TestMethod]
@@ -76,10 +84,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string rootInputFolder = TestUtils.CreateTestSpecificFolder(this.TestContext, "Inputs");
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = @"t:\TeamBuildDir_Legacy\.sonarqube";
-            preImportProperties.TeamBuildLegacyBuildDirectory = @"t:\TeamBuildDir_Legacy";
-            preImportProperties.TeamBuild2105BuildDirectory = "";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = @"t:\TeamBuildDir_Legacy\.sonarqube",
+                TeamBuildLegacyBuildDirectory = @"t:\TeamBuildDir_Legacy",
+                TeamBuild2105BuildDirectory = ""
+            };
             ProjectRootElement projectRoot = BuildUtilities.CreateValidProjectRoot(this.TestContext, rootInputFolder, preImportProperties);
 
             // Act
@@ -97,10 +107,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string rootInputFolder = TestUtils.CreateTestSpecificFolder(this.TestContext, "Inputs");
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = @"t:\TeamBuildDir_NonLegacy\.sonarqube"; // FIXME
-            preImportProperties.TeamBuildLegacyBuildDirectory = "";
-            preImportProperties.TeamBuild2105BuildDirectory = @"t:\TeamBuildDir_NonLegacy";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = @"t:\TeamBuildDir_NonLegacy\.sonarqube", // FIXME
+                TeamBuildLegacyBuildDirectory = "",
+                TeamBuild2105BuildDirectory = @"t:\TeamBuildDir_NonLegacy"
+            };
             ProjectRootElement projectRoot = BuildUtilities.CreateValidProjectRoot(this.TestContext, rootInputFolder, preImportProperties);
 
             // Act
@@ -118,10 +130,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string rootInputFolder = TestUtils.CreateTestSpecificFolder(this.TestContext, "Inputs");
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = @"c:\sonarQTemp";
-            preImportProperties.TeamBuildLegacyBuildDirectory = @"t:\Legacy TeamBuildPath\"; // SonarQubeTempPath setting should take precedence
-            preImportProperties.TeamBuild2105BuildDirectory = @"x:\New Team Build Path\";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = @"c:\sonarQTemp",
+                TeamBuildLegacyBuildDirectory = @"t:\Legacy TeamBuildPath\", // SonarQubeTempPath setting should take precedence
+                TeamBuild2105BuildDirectory = @"x:\New Team Build Path\"
+            };
 
             ProjectRootElement projectRoot = BuildUtilities.CreateValidProjectRoot(this.TestContext, rootInputFolder, preImportProperties);
 
@@ -142,12 +156,14 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string rootInputFolder = TestUtils.CreateTestSpecificFolder(this.TestContext, "Inputs");
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeOutputPath = @"c:\output";
-            preImportProperties.SonarQubeConfigPath= @"c:\config";
-            preImportProperties.SonarQubeTempPath = @"c:\sonarQTemp";
-            preImportProperties.TeamBuildLegacyBuildDirectory = @"t:\Legacy TeamBuildPath\";
-            preImportProperties.TeamBuild2105BuildDirectory = @"t:\New TeamBuildPath\";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeOutputPath = @"c:\output",
+                SonarQubeConfigPath = @"c:\config",
+                SonarQubeTempPath = @"c:\sonarQTemp",
+                TeamBuildLegacyBuildDirectory = @"t:\Legacy TeamBuildPath\",
+                TeamBuild2105BuildDirectory = @"t:\New TeamBuildPath\"
+            };
 
             ProjectRootElement projectRoot = BuildUtilities.CreateValidProjectRoot(this.TestContext, rootInputFolder, preImportProperties);
 

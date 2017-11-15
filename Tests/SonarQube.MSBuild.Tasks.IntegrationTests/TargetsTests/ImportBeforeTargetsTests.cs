@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -43,6 +43,7 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
         [TestInitialize]
         public void TestInitialize()
         {
+            HackForVs2017Update3.Enable();
             TestUtils.EnsureImportBeforeTargetsExists(this.TestContext);
         }
 
@@ -56,10 +57,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             this.EnsureDummyIntegrationTargetsFileExists();
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTargetsPath = "";
-            preImportProperties.TeamBuild2105BuildDirectory = "";
-            preImportProperties.TeamBuildLegacyBuildDirectory = "";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTargetsPath = "",
+                TeamBuild2105BuildDirectory = "",
+                TeamBuildLegacyBuildDirectory = ""
+            };
 
             // Act
             ProjectInstance projectInstance = this.CreateAndEvaluateProject(preImportProperties);
@@ -87,10 +90,12 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string dummySonarTargetsDir = this.EnsureDummyIntegrationTargetsFileExists();
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = Path.GetTempPath();
-            preImportProperties.SonarQubeTargetsPath = Path.GetDirectoryName(dummySonarTargetsDir);
-            preImportProperties.BuildingInsideVS = "tRuE"; // should not be case-sensitive
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = Path.GetTempPath(),
+                SonarQubeTargetsPath = Path.GetDirectoryName(dummySonarTargetsDir),
+                BuildingInsideVS = "tRuE" // should not be case-sensitive
+            };
 
             // Act
             ProjectInstance projectInstance = this.CreateAndEvaluateProject(preImportProperties);
@@ -116,11 +121,13 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
         {
             // 1. Prebuild
             // Arrange
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = "nonExistentPath";
-            preImportProperties.MSBuildExtensionsPath = "nonExistentPath";
-            preImportProperties.TeamBuild2105BuildDirectory = "";
-            preImportProperties.TeamBuildLegacyBuildDirectory = "";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = "nonExistentPath",
+                MSBuildExtensionsPath = "nonExistentPath",
+                TeamBuild2105BuildDirectory = "",
+                TeamBuildLegacyBuildDirectory = ""
+            };
 
             // Act
             ProjectInstance projectInstance = this.CreateAndEvaluateProject(preImportProperties);
@@ -153,11 +160,13 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             // Arrange
             string dummySonarTargetsDir = this.EnsureDummyIntegrationTargetsFileExists();
 
-            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties();
-            preImportProperties.SonarQubeTempPath = Path.GetTempPath();
-            preImportProperties.SonarQubeTargetsPath = Path.GetDirectoryName(dummySonarTargetsDir);
-            preImportProperties.TeamBuild2105BuildDirectory = "";
-            preImportProperties.TeamBuildLegacyBuildDirectory = "";
+            WellKnownProjectProperties preImportProperties = new WellKnownProjectProperties
+            {
+                SonarQubeTempPath = Path.GetTempPath(),
+                SonarQubeTargetsPath = Path.GetDirectoryName(dummySonarTargetsDir),
+                TeamBuild2105BuildDirectory = "",
+                TeamBuildLegacyBuildDirectory = ""
+            };
 
             // Act
             ProjectInstance projectInstance = this.CreateAndEvaluateProject(preImportProperties);
@@ -176,7 +185,7 @@ namespace SonarQube.MSBuild.Tasks.IntegrationTests.TargetsTests
             logger.AssertTargetExecuted(TargetConstants.ImportBeforeInfoTarget);
             logger.AssertExpectedErrorCount(0);
         }
-        
+
         #endregion
 
         #region Private methods

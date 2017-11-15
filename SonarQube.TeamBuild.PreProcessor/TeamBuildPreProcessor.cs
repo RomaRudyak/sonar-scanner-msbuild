@@ -17,16 +17,16 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
-using SonarQube.Common;
-using SonarQube.TeamBuild.Integration;
-using SonarQube.TeamBuild.PreProcessor.Roslyn.Model;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using SonarQube.Common;
+using SonarQube.TeamBuild.Integration;
+using SonarQube.TeamBuild.PreProcessor.Roslyn.Model;
 
 namespace SonarQube.TeamBuild.PreProcessor
 {
@@ -38,11 +38,13 @@ namespace SonarQube.TeamBuild.PreProcessor
         public const string VBNetLanguage = "vbnet";
         public const string VBNetPluginKey = "vbnet";
 
-        public const string FxCopRulesetName = "SonarQubeFxCop-{0}.ruleset";
-
-        private readonly static List<PluginDefinition> plugins;
         private readonly static PluginDefinition csharp = new PluginDefinition(CSharpLanguage, CSharpPluginKey);
         private readonly static PluginDefinition vbnet = new PluginDefinition(VBNetLanguage, VBNetPluginKey);
+        private readonly static List<PluginDefinition> plugins = new List<PluginDefinition>
+        {
+            csharp,
+            vbnet
+        };
 
         private readonly IPreprocessorObjectFactory factory;
         private readonly ILogger logger;
@@ -51,23 +53,8 @@ namespace SonarQube.TeamBuild.PreProcessor
 
         public TeamBuildPreProcessor(IPreprocessorObjectFactory factory, ILogger logger)
         {
-            if (factory == null)
-            {
-                throw new ArgumentNullException(nameof(factory));
-            }
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-            this.factory = factory;
-            this.logger = logger;
-        }
-
-        static TeamBuildPreProcessor()
-        {
-            plugins = new List<PluginDefinition>();
-            plugins.Add(csharp);
-            plugins.Add(vbnet);
+            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         #endregion Constructor(s)
@@ -133,10 +120,7 @@ namespace SonarQube.TeamBuild.PreProcessor
             }
 
             ISonarQubeServer server = this.factory.CreateSonarQubeServer(localSettings, this.logger);
-
-            IDictionary<string, string> serverSettings;
-            List<AnalyzerSettings> analyzersSettings;
-            if (!FetchArgumentsAndRulesets(server, localSettings, teamBuildSettings, out serverSettings, out analyzersSettings))
+            if (!FetchArgumentsAndRulesets(server, localSettings, teamBuildSettings, out IDictionary<string, string> serverSettings, out List<AnalyzerSettings> analyzersSettings))
             {
                 return false;
             }
@@ -176,8 +160,7 @@ namespace SonarQube.TeamBuild.PreProcessor
                 this.logger.LogInfo(Resources.MSG_FetchingAnalysisConfiguration);
 
                 // Respect sonar.branch setting if set
-                string projectBranch = null;
-                args.TryGetSetting(SonarProperties.ProjectBranch, out projectBranch);
+                args.TryGetSetting(SonarProperties.ProjectBranch, out string projectBranch);
 
                 // Fetch the SonarQube project properties
                 serverSettings = server.GetProperties(args.ProjectKey, projectBranch);
@@ -193,8 +176,7 @@ namespace SonarQube.TeamBuild.PreProcessor
                     }
 
                     // Fetch project quality profile
-                    string qualityProfile;
-                    if (!server.TryGetQualityProfile(args.ProjectKey, projectBranch, args.Organization, plugin.Language, out qualityProfile))
+                    if (!server.TryGetQualityProfile(args.ProjectKey, projectBranch, args.Organization, plugin.Language, out string qualityProfile))
                     {
                         this.logger.LogDebug(Resources.RAP_NoQualityProfile, plugin.Language, args.ProjectKey);
                         continue;
@@ -210,18 +192,6 @@ namespace SonarQube.TeamBuild.PreProcessor
                     }
 
                     IList<string> inactiveRules = server.GetInactiveRules(qualityProfile, plugin.Language);
-
-                    // Generate fxcop rulesets
-                    this.logger.LogInfo(Resources.MSG_GeneratingRulesets);
-                    string fxCopPath = Path.Combine(settings.SonarConfigDirectory, string.Format(FxCopRulesetName, plugin.Language));
-                    if (plugin.Language.Equals(VBNetLanguage))
-                    {
-                        GenerateFxCopRuleset("fxcop-vbnet", activeRules, fxCopPath);
-                    }
-                    else
-                    {
-                        GenerateFxCopRuleset("fxcop", activeRules, fxCopPath);
-                    }
 
                     // Generate Roslyn analyzers settings and rulesets
                     IAnalyzerProvider analyzerProvider = this.factory.CreateRoslynAnalyzerProvider(this.logger);
@@ -252,12 +222,6 @@ namespace SonarQube.TeamBuild.PreProcessor
             }
 
             return true;
-        }
-
-        private void GenerateFxCopRuleset(string repository, IList<ActiveRule> activeRules, string path)
-        {
-            this.logger.LogDebug(Resources.MSG_GeneratingRuleset, path);
-            this.factory.CreateRulesetGenerator().Generate(repository, activeRules, path);
         }
 
         #endregion Private methods

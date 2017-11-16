@@ -58,8 +58,6 @@ namespace SonarScanner.Shim
 
         #region ISonarScanner interface
 
-        public abstract Boolean IsBatchScript { get; }
-
         public ProjectInfoAnalysisResult Execute(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger)
         {
             if (config == null)
@@ -116,14 +114,18 @@ namespace SonarScanner.Shim
             }
         }
 
-        private string FindScannerExe()
+        protected virtual void OnPreExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string fullPropertiesFilePath)
         {
-            var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
-            var scriptName = GetScannerFileName();
-            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin", scriptName);
+            
         }
 
-        protected abstract String GetScannerFileName();
+        private static string GetScannerScriptDirPath()
+        {
+            var binFolder = Path.GetDirectoryName(typeof(SonarScannerWrapper).Assembly.Location);
+            return Path.Combine(binFolder, "sonar-scanner-" + SonarScannerVersion, "bin");
+        }
+
+        protected abstract String GetScannerScripFileName();
 
         public /* for test purposes */ bool ExecuteJavaRunner(AnalysisConfig config, IEnumerable<string> userCmdLineArguments, ILogger logger, string exeFileName, string propertiesFileName)
         {
